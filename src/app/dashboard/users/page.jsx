@@ -30,7 +30,12 @@ export default function UsersPage() {
     useEffect(() => {
         const storedOrders = localStorage.getItem("orders");
         if (storedOrders) {
-            setOrders(JSON.parse(storedOrders));
+            try {
+                setOrders(JSON.parse(storedOrders));
+            } catch (error) {
+                console.error("Failed to parse orders from localStorage", error);
+                setOrders([]);
+            }
         } else {
             setOrders([]);
         }
@@ -62,8 +67,15 @@ export default function UsersPage() {
     useEffect(() => {
       const handleStorageChange = (e) => {
           if (e.detail?.key === 'orders' || !e.detail) {
-              const storedOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-                setOrders(storedOrders);
+              const storedOrders = localStorage.getItem("orders");
+              if (storedOrders) {
+                try {
+                    setOrders(JSON.parse(storedOrders));
+                } catch (error) {
+                    console.error("Failed to parse orders from localStorage", error);
+                    setOrders([]);
+                }
+              }
           }
         };
 
