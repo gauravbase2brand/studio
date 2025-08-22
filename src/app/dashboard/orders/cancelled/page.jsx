@@ -169,18 +169,6 @@ export default function CancelledOrdersPage() {
                             onChange={e => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline">
-                                <FileDown className="mr-2 h-4 w-4" /> Export
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            <DropdownMenuItem onClick={() => handleExport('csv')}>Export as CSV</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleExport('excel')}>Export as Excel</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleExport('pdf')}>Export as PDF</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
                 </div>
             </div>
         </CardHeader>
