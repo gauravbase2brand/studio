@@ -72,8 +72,6 @@ export type Dish = {
     deliveryType?: string;
     saleStartDate?: string | null;
     saleEndDate?: string | null;
-    hasExpiryDate?: boolean;
-    hasDiscount?: boolean;
 }
 
 export type Offer = {

@@ -382,61 +382,6 @@ export default function AddDishPage({ params }) {
                     <Label htmlFor="long-description">Product Long Description</Label>
                     <Textarea id="long-description" placeholder="Add a long description for your product" rows={6} value={longDescription} onChange={(e) => setLongDescription(e.target.value)} />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="sale-start-on">Sale Start On</Label>
-                         <Popover>
-                            <PopoverTrigger asChild>
-                            <Button
-                                variant={"outline"}
-                                className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !saleStartDate && "text-muted-foreground"
-                                )}
-                            >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {saleStartDate ? format(saleStartDate, "PPP") : <span>Pick a date</span>}
-                            </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                            <Calendar
-                                mode="single"
-                                selected={saleStartDate}
-                                onSelect={setSaleStartDate}
-                                fromDate={new Date()}
-                                initialFocus
-                            />
-                            </PopoverContent>
-                        </Popover>
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="sale-end-on">Sale End On</Label>
-                         <Popover>
-                            <PopoverTrigger asChild>
-                            <Button
-                                variant={"outline"}
-                                className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !saleEndDate && "text-muted-foreground"
-                                )}
-                                disabled={!saleStartDate}
-                            >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {saleEndDate ? format(saleEndDate, "PPP") : <span>Pick a date</span>}
-                            </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                            <Calendar
-                                mode="single"
-                                selected={saleEndDate}
-                                onSelect={setSaleEndDate}
-                                fromDate={saleStartDate}
-                                initialFocus
-                            />
-                            </PopoverContent>
-                        </Popover>
-                    </div>
-                </div>
                 <div className="flex justify-end gap-2 mt-6">
                     <Button variant="ghost" onClick={clearForm}>Clear</Button>
                     <Button onClick={handleAddDish}>
