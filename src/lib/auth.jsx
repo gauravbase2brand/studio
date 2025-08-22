@@ -45,6 +45,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  
   const updateUserInStorage = (users) => {
     localStorage.setItem('allUsers', JSON.stringify(users));
     setAllUsers(users);
