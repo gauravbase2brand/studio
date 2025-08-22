@@ -21,6 +21,7 @@ export const AuthProvider = ({ children }) => {
   const router = useRouter();
 
   useEffect(() => {
+    setLoading(true);
     try {
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
@@ -31,8 +32,9 @@ export const AuthProvider = ({ children }) => {
       if (storedUsers) {
         setAllUsers(JSON.parse(storedUsers));
       } else {
-        setAllUsers(Object.values(initialUsers));
-        localStorage.setItem('allUsers', JSON.stringify(Object.values(initialUsers)));
+        const usersArray = Object.values(initialUsers);
+        setAllUsers(usersArray);
+        localStorage.setItem('allUsers', JSON.stringify(usersArray));
       }
     } catch (error) {
       console.error("Failed to parse data from localStorage", error);
