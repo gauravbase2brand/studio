@@ -1,0 +1,230 @@
+
+"use client";
+
+import { useState, useEffect, useRef } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { DashboardHeader } from "@/components/dashboard-header";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { Save, ChevronLeft, Upload } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import Link from 'next/link';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
+
+
+export default function EditDriverPage() {
+    const router = useRouter();
+    const params = useParams();
+    const { toast } = useToast();
+    const { id } = params;
+
+    const [driver, setDriver] = useState(null);
+    const [name, setName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [vehicle, setVehicle] = useState('');
+    const [status, setStatus] = useState('');
+    const [panCardNumber, setPanCardNumber] = useState('');
+    const [licenseNumber, setLicenseNumber] = useState('');
+    const [avatar, setAvatar] = useState('');
+    const [avatarPreview, setAvatarPreview] = useState('');
+    const fileInputRef = useRef(null);
+    const [errors, setErrors] = useState({});
+
+    const handleInputChange = (setter, field) => (e) => {
+        setter(e.target.value);
+        if (errors[field]) {
+            setErrors(prev => ({...prev, [field]: false}));
+        }
+    }
+    
+    const handlePhoneChange = (e) => {
+        const value = e.target.value.replace(/\D/g, '');
+        if (value.length <= 10) {
+            setPhone(value);
+            if (errors.phone) {
+                setErrors(prev => ({...prev, phone: false}));
+            }
+        }
+    };
+    
+    const handlePanCardChange = (e) => {
+        const value = e.target.value.toUpperCase();
+        if (value.length <= 10) {
+            setPanCardNumber(value);
+            if (errors.panCardNumber) {
+                setErrors(prev => ({...prev, panCardNumber: false}));
+            }
+        }
+    };
+
+
+    useEffect(() => {
+        if (id) {
+            const existingDrivers = JSON.parse(localStorage.getItem('drivers') || '[]');
+            const currentDriver = existingDrivers.find(d => d.id === id);
+            if (currentDriver) {
+                setDriver(currentDriver);
+                setName(currentDriver.name);
+                setPhone(currentDriver.phone);
+                setVehicle(currentDriver.vehicle);
+                setStatus(currentDriver.status);
+                setPanCardNumber(currentDriver.panCardNumber || '');
+                setLicenseNumber(currentDriver.licenseNumber || '');
+                setAvatar(currentDriver.avatar || '');
+                setAvatarPreview(currentDriver.avatar || '');
+            } else {
+                 toast({
+                    title: "Driver not found",
+                    description: "The requested driver could not be found.",
+                    variant: "destructive"
+                });
+                router.push('/dashboard/drivers');
+            }
+        }
+    }, [id, router, toast]);
+    
+    const handleAvatarChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setAvatarPreview(reader.result);
+                setAvatar(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+
+    const handleUpdateDriver = () => {
+        const newErrors = {};
+        if (!name) newErrors.name = true;
+        if (!phone) newErrors.phone = true;
+        if (!vehicle) newErrors.vehicle = true;
+        if (!panCardNumber) newErrors.panCardNumber = true;
+        if (!licenseNumber) newErrors.licenseNumber = true;
+
+        setErrors(newErrors);
+
+        if (Object.keys(newErrors).length > 0) {
+            toast({
+                title: "Missing Information",
+                description: "Please fill out all fields to update the driver.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        const updatedDriver = {
+            ...driver,
+            name,
+            phone,
+            vehicle,
+            status,
+            panCardNumber,
+            licenseNumber,
+            avatar: avatar,
+        };
+
+        const existingDrivers = JSON.parse(localStorage.getItem('drivers') || '[]');
+        const updatedDrivers = existingDrivers.map(d => (d.id === id ? updatedDriver : d));
+        localStorage.setItem('drivers', JSON.stringify(updatedDrivers));
+        window.dispatchEvent(new Event('storage'));
+
+
+        toast({
+            title: "Driver Updated",
+            description: `${name} has been successfully updated.`
+        });
+
+        router.push('/dashboard/drivers');
+    };
+
+    if (!driver) {
+        return <div>Loading...</div>
+    }
+
+    return (
+        <>
+            <DashboardHeader title="Edit Driver">
+                <Button variant="outline" asChild>
+                    <Link href="/dashboard/drivers">
+                        <ChevronLeft className="mr-2 h-4 w-4" />
+                        Back to Drivers
+                    </Link>
+                </Button>
+            </DashboardHeader>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Driver Information</CardTitle>
+                    <CardDescription>Update the details for this driver.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                     <div className="space-y-2 flex flex-col items-center">
+                        <Avatar className="h-24 w-24 mb-2">
+                            <AvatarImage src={avatarPreview} alt={name} />
+                            <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <Button variant="outline" onClick={() => fileInputRef.current.click()}>
+                            <Upload className="mr-2 h-4 w-4" />
+                            Change Photo
+                        </Button>
+                        <Input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleAvatarChange}
+                            className="hidden"
+                            accept="image/*"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="name">Full Name <span className="text-destructive">*</span></Label>
+                        <Input id="name" placeholder="e.g. John Doe" value={name} onChange={handleInputChange(setName, 'name')} className={cn(errors.name && 'border-destructive')} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="phone">Phone Number <span className="text-destructive">*</span></Label>
+                        <Input id="phone" type="tel" placeholder="e.g. 1234567890" value={phone} onChange={handlePhoneChange} className={cn(errors.phone && 'border-destructive')} />
+                        <p className="text-sm text-muted-foreground text-right">{phone.length}/10</p>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="vehicle">Vehicle Number <span className="text-destructive">*</span></Label>
+                        <Input id="vehicle" placeholder="e.g. Bike - ABC 123" value={vehicle} onChange={handleInputChange(setVehicle, 'vehicle')} className={cn(errors.vehicle && 'border-destructive')} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="pan">PAN Card Number <span className="text-destructive">*</span></Label>
+                        <Input id="pan" placeholder="e.g. ABCDE1234F" value={panCardNumber} onChange={handlePanCardChange} className={cn(errors.panCardNumber && 'border-destructive')} />
+                        <p className="text-sm text-muted-foreground text-right">{panCardNumber.length}/10</p>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="license">License Number <span className="text-destructive">*</span></Label>
+                        <Input id="license" placeholder="e.g. DL-1234567890" value={licenseNumber} onChange={handleInputChange(setLicenseNumber, 'licenseNumber')} className={cn(errors.licenseNumber && 'border-destructive')} />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="status">Status</Label>
+                        <Select onValueChange={setStatus} value={status}>
+                            <SelectTrigger id="status">
+                                <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Available">Available</SelectItem>
+                                <SelectItem value="On-route">On-route</SelectItem>
+                                <SelectItem value="Delivering">Delivering</SelectItem>
+                                <SelectItem value="Offline">Offline</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="flex justify-end">
+                        <Button onClick={handleUpdateDriver}>
+                            <Save className="mr-2 h-4 w-4" />
+                            Save Changes
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+        </>
+    );
+}
