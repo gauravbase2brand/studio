@@ -108,27 +108,34 @@ export default function OrderDetailsPage() {
     const id = params.id;
     if (!id) return;
 
-    const storedOrders = localStorage.getItem("orders");
-    const orders = storedOrders ? JSON.parse(storedOrders) : [];
-    setAllOrders(orders);
-    const currentOrder = orders.find((o) => o.id === id);
-    if(currentOrder) {
-      setOrder(currentOrder);
-      setSelectedDriver(currentOrder.driverId || '');
-      setNote(currentOrder.note || '');
-    }
+    try {
+        const storedOrders = localStorage.getItem("orders");
+        const orders = storedOrders ? JSON.parse(storedOrders) : [];
+        setAllOrders(orders);
+        const currentOrder = orders.find((o) => o.id === id);
+        if(currentOrder) {
+          setOrder(currentOrder);
+          setSelectedDriver(currentOrder.driverId || '');
+          setNote(currentOrder.note || '');
+        }
 
-    const storedDishes = localStorage.getItem("dishes");
-    if (storedDishes) {
-        setDishes(JSON.parse(storedDishes));
+        const storedDishes = localStorage.getItem("dishes");
+        if (storedDishes) {
+            setDishes(JSON.parse(storedDishes));
+        }
+    } catch(e) {
+        console.error("Failed to parse data from localStorage", e);
     }
-
   }, [params.id]);
 
   useEffect(() => {
-    const storedDrivers = localStorage.getItem("drivers");
-    if (storedDrivers) {
-      setDrivers(JSON.parse(storedDrivers));
+    try {
+        const storedDrivers = localStorage.getItem("drivers");
+        if (storedDrivers) {
+          setDrivers(JSON.parse(storedDrivers));
+        }
+    } catch(e) {
+        console.error("Failed to parse drivers from localStorage", e);
     }
   }, []);
 
@@ -672,24 +679,28 @@ export default function OrderDetailsPage() {
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm">
                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">Transaction ID:</span>
-                        <span className="font-mono">#20234567213</span>
-                    </div>
-                    <div className="flex justify-between">
                         <span className="text-muted-foreground">Payment Method:</span>
                         <span>{order.paymentMethod || 'N/A'}</span>
                     </div>
-                     <div className="flex justify-between">
-                        <span className="text-muted-foreground">Card Holder Name:</span>
-                        <span>{order.customer.name}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Card Number:</span>
-                        <div className="flex items-center gap-2">
-                           <CreditCard className="h-5 w-5" />
-                           <span className="font-mono">**** **** **** 4564</span>
-                        </div>
-                    </div>
+                    {order.paymentMethod !== 'Cash on Delivery' && (
+                        <>
+                            <div className="flex justify-between">
+                                <span className="text-muted-foreground">Transaction ID:</span>
+                                <span className="font-mono">#20234567213</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-muted-foreground">Card Holder Name:</span>
+                                <span>{order.customer.name}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground">Card Number:</span>
+                                <div className="flex items-center gap-2">
+                                <CreditCard className="h-5 w-5" />
+                                <span className="font-mono">**** **** **** 4564</span>
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </CardContent>
             </Card>
         </div>
